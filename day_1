@@ -1,0 +1,89 @@
+---
+title: "Advent of Code Day 1"
+format: html
+---
+
+```{r}
+require(tidyverse)
+```
+
+# 01 Read Data
+
+```{r}
+
+df <-
+  vroom::vroom(
+    "input.txt",
+    col_names = c("list_1", "filler1", "filler1", "list_2")
+  ) |>
+  select(-(starts_with("fill")))
+```
+
+# 02 Sort Data and Calculate Difference
+
+```{r}
+
+list_1 <-
+  df |>
+  pull(list_1) |>
+  sort()
+
+list_2 <-
+  df |>
+  pull(list_2) |>
+  sort()
+
+sorted_df <-
+  bind_cols(
+    list_1,
+    list_2
+  ) |>
+  rename_with(
+    ~ paste0("list_", 1:2)
+  )
+
+```
+
+# 03 Sum Difference in Distances = 2769675
+
+```{r}
+
+
+  sorted_df |>
+  rowwise() |>
+  mutate(
+    diff = (list_2 - list_1) |> (\(x) abs(x))()
+  ) |> 
+  ungroup() |> 
+  reframe(
+    tot_distance = sum(diff)
+  )
+
+```
+
+# 04 Part Two
+
+Total similarity = 24643097
+
+
+```{r}
+similarity_values <-
+  intersect(
+    list_1, 
+    list_2
+  )
+
+sorted_df |> 
+  filter(
+    list_2 %in% similarity_values
+  ) |> 
+  count(list_2) |> 
+  mutate(
+    score = list_2 * n
+  ) |> 
+  ungroup() |> 
+  reframe(
+    total_similarity = sum(score)
+  )
+  
+```
