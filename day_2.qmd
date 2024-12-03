@@ -1,0 +1,847 @@
+--
+title: "Advent of Code Day 2"
+format: html
+---
+
+# 00 Package
+
+```{r}
+require(tidyverse)
+```
+
+# 01 Read Data
+
+```{r}
+
+df <-
+  vroom::vroom(
+    "day_2_input.txt",
+    col_names = FALSE
+  ) 
+  ```
+
+# 02 Clean Data
+
+```{r}
+
+df <-
+  df |> 
+  separate(
+    col = X6, 
+    into = paste0("extra", 1:3)
+  ) |> 
+  mutate(
+    across(
+      starts_with("extra"),
+      ~as.numeric(.x)
+    )
+  ) |> 
+  rename(
+    X6 = extra1,
+    X7 = extra2,
+    X8 = extra3
+  )
+```
+
+# 03 Attempt to solve
+
+The levels are either all increasing or all decreasing.
+Any two adjacent levels differ by at least one and at most three.
+
+
+```{r}
+
+df <-
+  df |> 
+  rowwise() |> 
+  mutate(
+    indicator = case_when(
+      is.na(X6) & is.na(X7) & is.na(X8) ~ 5,
+      !is.na(X6) & is.na(X7) & is.na(X8) ~ 6,
+      !is.na(X6) & !is.na(X7) & is.na(X8) ~ 7,
+      !is.na(X6) & !is.na(X7) & !is.na(X8) ~ 8,
+    )
+  ) |> 
+  ungroup() 
+```
+
+# 03.01 5 columns of values
+
+```{r}
+df_5 <-
+  df |> 
+  filter(indicator == 5) |> 
+  select(
+    !c(X6:X8)
+  )
+```
+
+
+```{r}
+
+df_5_safe_pt_1 <-
+  df_5 |> 
+  rowwise() |> 
+  mutate(
+    safe = case_when(
+      (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+      (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+      TRUE ~ "Not Safe"
+    )
+  ) |> 
+  filter(safe != "Not Safe") 
+
+```
+
+
+```{r}
+df_5_safe_pt_1_incr <-
+  df_5_safe_pt_1 |> 
+  filter(safe == "Increasing") |> 
+  rowwise() |> 
+  mutate(
+    comp_1 = X2 - X1,
+    comp_2 = X3 - X2,
+    comp_3 = X4 - X3,
+    comp_4 = X5 - X4
+  ) |> 
+  ungroup() |> 
+  filter(
+    comp_1 <= 3,
+    comp_2 <= 3,
+    comp_3 <= 3,
+    comp_4 <= 3
+  )
+```
+
+
+```{r}
+
+df_5_safe_pt_1_decr <-
+  df_5_safe_pt_1 |> 
+  filter(safe == "Decreasing") |> 
+  rowwise() |> 
+  mutate(
+    comp_1 = abs(X2 - X1),
+    comp_2 = abs(X3 - X2),
+    comp_3 = abs(X4 - X3),
+    comp_4 = abs(X5 - X4)
+  ) |> 
+  ungroup() |> 
+  filter(
+    comp_1 <= 3,
+    comp_2 <= 3,
+    comp_3 <= 3,
+    comp_4 <= 3
+  )
+```
+
+# 03.02 6 columns of values
+
+```{r}
+df_6 <-
+  df |> 
+  filter(indicator == 6) |> 
+  select(
+    !c(X7:X8)
+  )
+```
+
+
+```{r}
+
+df_6_safe_pt_1 <-
+  df_6 |> 
+  rowwise() |> 
+  mutate(
+    safe = case_when(
+      (X6 > X5) & (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+      (X6 < X5) & (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+      TRUE ~ "Not Safe"
+    )
+  ) |> 
+  filter(safe != "Not Safe") 
+
+```
+
+
+```{r}
+df_6_safe_pt_1_incr <-
+  df_6_safe_pt_1 |> 
+  filter(safe == "Increasing") |> 
+  rowwise() |> 
+  mutate(
+    comp_1 = X2 - X1,
+    comp_2 = X3 - X2,
+    comp_3 = X4 - X3,
+    comp_4 = X5 - X4,
+    comp_5 = X6 - X5
+  ) |> 
+  ungroup() |> 
+  filter(
+    comp_1 <= 3,
+    comp_2 <= 3,
+    comp_3 <= 3,
+    comp_4 <= 3,
+    comp_5 <= 3
+  )
+```
+
+
+```{r}
+
+df_6_safe_pt_1_decr <-
+  df_6_safe_pt_1 |> 
+  filter(safe == "Decreasing") |> 
+  rowwise() |> 
+  mutate(
+    comp_1 = abs(X2 - X1),
+    comp_2 = abs(X3 - X2),
+    comp_3 = abs(X4 - X3),
+    comp_4 = abs(X5 - X4),
+    comp_5 = abs(X6 - X5)
+  ) |> 
+  ungroup() |> 
+  filter(
+    comp_1 <= 3,
+    comp_2 <= 3,
+    comp_3 <= 3,
+    comp_4 <= 3,
+    comp_5 <= 3
+  )
+```
+
+# 03.03 7 columns of values
+
+```{r}
+df_7 <-
+  df |> 
+  filter(indicator == 7) |> 
+  select(
+    !c(X8)
+  )
+```
+
+
+```{r}
+
+df_7_safe_pt_1 <-
+  df_7 |> 
+  rowwise() |> 
+  mutate(
+    safe = case_when(
+      (X7 > X6) & (X6 > X5) & (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+      (X7 < X6) & (X6 < X5) & (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+      TRUE ~ "Not Safe"
+    )
+  ) |> 
+  filter(safe != "Not Safe") 
+
+```
+
+
+```{r}
+df_7_safe_pt_1_incr <-
+  df_7_safe_pt_1 |> 
+  filter(safe == "Increasing") |> 
+  rowwise() |> 
+  mutate(
+    comp_1 = X2 - X1,
+    comp_2 = X3 - X2,
+    comp_3 = X4 - X3,
+    comp_4 = X5 - X4,
+    comp_5 = X6 - X5,
+    comp_6 = X7 - X6
+  ) |> 
+  ungroup() |> 
+  filter(
+    comp_1 <= 3,
+    comp_2 <= 3,
+    comp_3 <= 3,
+    comp_4 <= 3,
+    comp_5 <= 3,
+    comp_6 <= 3
+  )
+```
+
+
+```{r}
+
+df_7_safe_pt_1_decr <-
+  df_7_safe_pt_1 |> 
+  filter(safe == "Decreasing") |> 
+  rowwise() |> 
+  mutate(
+    comp_1 = abs(X2 - X1),
+    comp_2 = abs(X3 - X2),
+    comp_3 = abs(X4 - X3),
+    comp_4 = abs(X5 - X4),
+    comp_5 = abs(X6 - X5),
+    comp_6 = abs(X7 - X6)
+  ) |> 
+  ungroup() |> 
+  filter(
+    comp_1 <= 3,
+    comp_2 <= 3,
+    comp_3 <= 3,
+    comp_4 <= 3,
+    comp_5 <= 3,
+    comp_6 <= 3
+  )
+```
+
+# 03.04 8 columns of values
+
+```{r}
+df_8 <-
+  df |> 
+  filter(indicator == 8) 
+```
+
+
+```{r}
+
+df_8_safe_pt_1 <-
+  df_8 |> 
+  rowwise() |> 
+  mutate(
+    safe = case_when(
+      (X8 > X7) & (X7 > X6) & (X6 > X5) & (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+      (X8 < X7) & (X7 < X6) & (X6 < X5) & (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+      TRUE ~ "Not Safe"
+    )
+  ) |> 
+  filter(safe != "Not Safe") 
+
+```
+
+
+```{r}
+df_8_safe_pt_1_incr <-
+  df_8_safe_pt_1 |> 
+  filter(safe == "Increasing") |> 
+  rowwise() |> 
+  mutate(
+    comp_1 = X2 - X1,
+    comp_2 = X3 - X2,
+    comp_3 = X4 - X3,
+    comp_4 = X5 - X4,
+    comp_5 = X6 - X5,
+    comp_6 = X7 - X6,
+    comp_7 = X8 - X7
+  ) |> 
+  ungroup() |> 
+  filter(
+    comp_1 <= 3,
+    comp_2 <= 3,
+    comp_3 <= 3,
+    comp_4 <= 3,
+    comp_5 <= 3,
+    comp_6 <= 3,
+    comp_7 <= 3
+  )
+```
+
+
+```{r}
+
+df_8_safe_pt_1_decr <-
+  df_8_safe_pt_1 |> 
+  filter(safe == "Decreasing") |> 
+  rowwise() |> 
+  mutate(
+    comp_1 = abs(X2 - X1),
+    comp_2 = abs(X3 - X2),
+    comp_3 = abs(X4 - X3),
+    comp_4 = abs(X5 - X4),
+    comp_5 = abs(X6 - X5),
+    comp_6 = abs(X7 - X6),
+    comp_7 = abs(X8 - X7)
+  ) |> 
+  ungroup() |> 
+  filter(
+    comp_1 <= 3,
+    comp_2 <= 3,
+    comp_3 <= 3,
+    comp_4 <= 3,
+    comp_5 <= 3,
+    comp_6 <= 3,
+    comp_7 <= 3
+  )
+```
+
+Part 1: total safe reports = 246
+
+```{r}
+
+mget(
+  c(ls() |> (\(x) grep(pattern = "decr", x = x, value = TRUE))(),
+  ls() |> (\(x) grep(pattern = "incr", x = x, value = TRUE))())
+  ) |> 
+  map(~nrow(.x)) |> 
+  reduce(.f = sum)
+
+```
+
+# Part 2: UGH
+
+The Problem Dampener is a reactor-mounted module that lets the reactor safety systems tolerate a single bad level in what would otherwise be a safe report. It's like the bad level never happened!
+
+Now, the same rules apply as before, except if removing a single level from an unsafe report would make it safe, the report instead counts as safe.
+
+More of the above example's reports are now safe:
+
+7 6 4 2 1: Safe without removing any level.
+1 2 7 8 9: Unsafe regardless of which level is removed.
+9 7 6 2 1: Unsafe regardless of which level is removed.
+1 3 2 4 5: Safe by removing the second level, 3.
+8 6 4 4 1: Safe by removing the third level, 4.
+1 3 6 7 9: Safe without removing any level.
+Thanks to the Problem Dampener, 4 reports are actually safe!
+
+Update your analysis by handling situations where the Problem Dampener can remove a single level from unsafe reports. How many reports are now safe?
+
+# 04 Part 1: 5 Values
+
+```{r}
+
+df_additional_safe_5_tbl <-
+  df_5 |> 
+    rowwise() |> 
+    mutate(
+      safe = case_when(
+        (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+        (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+        TRUE ~ "Not Safe"
+      )
+    ) |> 
+    filter(safe == "Not Safe") |> 
+    mutate(
+      chg_1 = case_when(
+        X1 > X2 ~ -1,
+        X1 < X2 ~ 1,
+        X1 == X2 ~ 0
+      ),
+      chg_2 = case_when(
+        X2 > X3 ~ -1,
+        X2 < X3 ~ 1,
+        X2 == X3 ~ 0
+      ),
+      chg_3 = case_when(
+        X3 > X4 ~ -1,
+        X3 < X4 ~ 1,
+        X3 == X4 ~ 0
+      ),
+      chg_4 = case_when(
+        X4 > X5 ~ -1,
+        X4 < X5 ~ 1,
+        X4 == X5 ~ 0
+      )
+    ) |> 
+    mutate(
+      total_chg = sum(chg_1, chg_2, chg_3, chg_4)
+    ) |> 
+    filter(
+      total_chg >= 2 | total_chg <= -2
+    ) |> 
+    mutate(
+      comp_1 = X2 - X1,
+      comp_2 = X3 - X2,
+      comp_3 = X4 - X3,
+      comp_4 = X5 - X4
+    ) |> 
+    ungroup() |> 
+    filter(
+      abs(comp_1) <= 3,
+      abs(comp_2) <= 3,
+      abs(comp_3) <= 3,
+      abs(comp_4) <= 3
+    ) |> 
+    rowwise() |> 
+    mutate(
+      concat_vector = list(
+        c(X1, X2, X3, X4, X5)
+      )
+    ) |> 
+    mutate(
+      tot_unique_values = 
+        length(unique(concat_vector))
+    ) |>   
+    ungroup() |> 
+    filter(
+      tot_unique_values > (indicator - 2)
+    ) |> 
+    filter(
+      !((total_chg == -2) & (tot_unique_values == 4))
+    )  
+```
+
+# 04 Part 2:  6 Values
+
+```{r}
+
+df_additional_safe_6_tbl <-
+  df_6 |> 
+    rowwise() |> 
+    mutate(
+      safe = case_when(
+      (X6 > X5) & (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+      (X6 < X5) & (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+        TRUE ~ "Not Safe"
+      )
+    ) |> 
+    filter(safe == "Not Safe") |> 
+    mutate(
+      chg_1 = case_when(
+        X1 > X2 ~ -1,
+        X1 < X2 ~ 1,
+        X1 == X2 ~ 0
+      ),
+      chg_2 = case_when(
+        X2 > X3 ~ -1,
+        X2 < X3 ~ 1,
+        X2 == X3 ~ 0
+      ),
+      chg_3 = case_when(
+        X3 > X4 ~ -1,
+        X3 < X4 ~ 1,
+        X3 == X4 ~ 0
+      ),
+      chg_4 = case_when(
+        X4 > X5 ~ -1,
+        X4 < X5 ~ 1,
+        X4 == X5 ~ 0
+      ),
+      chg_5 = case_when(
+        X5 > X6 ~ -1,
+        X5 < X6 ~ 1,
+        X5 == X6 ~ 0
+      )
+    ) |> 
+    mutate(
+      total_chg = sum(chg_1, chg_2, chg_3, chg_4, chg_5)
+    ) |> 
+    filter(
+      total_chg >= 3 | total_chg <= -3
+    ) |> 
+    mutate(
+      comp_1 = X2 - X1,
+      comp_2 = X3 - X2,
+      comp_3 = X4 - X3,
+      comp_4 = X5 - X4,
+      comp_5 = X6 - X5
+    ) |> 
+    ungroup() |> 
+    filter(
+      abs(comp_1) <= 3,
+      abs(comp_2) <= 3,
+      abs(comp_3) <= 3,
+      abs(comp_4) <= 3,
+      abs(comp_5) <= 3
+    ) |> 
+    rowwise() |> 
+    mutate(
+      concat_vector = list(
+        c(X1, X2, X3, X4, X5, X6)
+      )
+    ) |> 
+    mutate(
+      tot_unique_values = 
+        length(unique(concat_vector))
+    ) |>   
+    ungroup() |> 
+    filter(
+      tot_unique_values > (indicator - 2)
+    ) #|> 
+    # filter(
+    #   !((total_chg == -3) & (tot_unique_values == 5))
+    # )  
+```
+
+# 04 Part 2: 7 Values
+
+```{r}
+df_additional_safe_7_tbl <-
+  df_7 |> 
+  rowwise() |> 
+  mutate(
+    safe = case_when(
+      (X7 > X6) & (X6 > X5) & (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+      (X7 < X6) & (X6 < X5) & (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+      TRUE ~ "Not Safe"
+    )
+  ) |> 
+  filter(safe == "Not Safe")  |> 
+  mutate(
+      chg_1 = case_when(
+        X1 > X2 ~ -1,
+        X1 < X2 ~ 1,
+        X1 == X2 ~ 0
+      ),
+      chg_2 = case_when(
+        X2 > X3 ~ -1,
+        X2 < X3 ~ 1,
+        X2 == X3 ~ 0
+      ),
+      chg_3 = case_when(
+        X3 > X4 ~ -1,
+        X3 < X4 ~ 1,
+        X3 == X4 ~ 0
+      ),
+      chg_4 = case_when(
+        X4 > X5 ~ -1,
+        X4 < X5 ~ 1,
+        X4 == X5 ~ 0
+      ),
+      chg_5 = case_when(
+        X5 > X6 ~ -1,
+        X5 < X6 ~ 1,
+        X5 == X6 ~ 0
+      ),
+      chg_6 = case_when(
+        X6 > X7 ~ -1,
+        X6 < X7 ~ 1,
+        X6 == X7 ~ 0
+      )
+    ) |> 
+    mutate(
+      total_chg = sum(chg_1, chg_2, chg_3, chg_4, chg_5, chg_6)
+    ) |> 
+    filter(
+      total_chg >= 4 | total_chg <= -4
+    ) |> 
+    mutate(
+      comp_1 = X2 - X1,
+      comp_2 = X3 - X2,
+      comp_3 = X4 - X3,
+      comp_4 = X5 - X4,
+      comp_5 = X6 - X5,
+      comp_6 = X7 - X6
+    ) |> 
+    ungroup() |> 
+    filter(
+      abs(comp_1) <= 3,
+      abs(comp_2) <= 3,
+      abs(comp_3) <= 3,
+      abs(comp_4) <= 3,
+      abs(comp_5) <= 3,
+      abs(comp_6) <= 3
+    ) |> 
+    rowwise() |> 
+    mutate(
+      concat_vector = list(
+        c(X1, X2, X3, X4, X5, X6, X7)
+      )
+    ) |> 
+    mutate(
+      tot_unique_values = 
+        length(unique(concat_vector))
+    ) |>   
+    ungroup() |> 
+    filter(
+      tot_unique_values > (indicator - 2)
+    ) # |> 
+    # filter(
+    #   !((total_chg == -4) & (tot_unique_values == 6))
+    # )  
+```
+
+# 04 Part 2: 8 Values
+
+```{r}
+df_additional_safe_8_tbl <-
+  df_8 |> 
+  rowwise() |> 
+  mutate(
+    safe = case_when(
+      (X8 > X7) & (X7 > X6) & (X6 > X5) & (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+      (X8 < X7) & (X7 < X6) & (X6 < X5) & (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+      TRUE ~ "Not Safe"
+    )
+  ) |> 
+  filter(safe == "Not Safe")  |> 
+  mutate(
+    chg_1 = case_when(
+      X1 > X2 ~ -1,
+      X1 < X2 ~ 1,
+      X1 == X2 ~ 0
+    ),
+    chg_2 = case_when(
+      X2 > X3 ~ -1,
+      X2 < X3 ~ 1,
+      X2 == X3 ~ 0
+    ),
+    chg_3 = case_when(
+      X3 > X4 ~ -1,
+      X3 < X4 ~ 1,
+      X3 == X4 ~ 0
+    ),
+    chg_4 = case_when(
+      X4 > X5 ~ -1,
+      X4 < X5 ~ 1,
+      X4 == X5 ~ 0
+    ),
+    chg_5 = case_when(
+      X5 > X6 ~ -1,
+      X5 < X6 ~ 1,
+      X5 == X6 ~ 0
+    ),
+    chg_6 = case_when(
+      X6 > X7 ~ -1,
+      X6 < X7 ~ 1,
+      X6 == X7 ~ 0
+    ),
+    chg_7 = case_when(
+      X7 > X8 ~ -1,
+      X7 < X8 ~ 1,
+      X7 == X8 ~ 0
+    )
+  ) |> 
+  mutate(
+    total_chg = sum(chg_1, chg_2, chg_3, chg_4, chg_5, chg_6, chg_7)
+  ) |> 
+  filter(
+    total_chg >= 5 | total_chg <= -5
+  ) |> 
+  mutate(
+    comp_1 = X2 - X1,
+    comp_2 = X3 - X2,
+    comp_3 = X4 - X3,
+    comp_4 = X5 - X4,
+    comp_5 = X6 - X5,
+    comp_6 = X7 - X6,
+    comp_7 = X8 - X7
+  ) |> 
+  ungroup() |> 
+  filter(
+    abs(comp_1) <= 3,
+    abs(comp_2) <= 3,
+    abs(comp_3) <= 3,
+    abs(comp_4) <= 3,
+    abs(comp_5) <= 3,
+    abs(comp_6) <= 3,
+    abs(comp_7) <= 3
+  ) |> 
+  rowwise() |> 
+  mutate(
+    concat_vector = list(
+      c(X1, X2, X3, X4, X5, X6, X7, X8)
+    )
+  ) |> 
+  mutate(
+    tot_unique_values = 
+      length(unique(concat_vector))
+  ) |>   
+  ungroup() |> 
+  filter(
+    tot_unique_values > (indicator - 2)
+  ) # |> 
+  # filter(
+  #   !((total_chg == -5) & (tot_unique_values == 7))
+  # )  
+```
+
+
+
+Part 2 Safe Reports = 246 + 38 = 284(?) NO.
+
+
+```{r}
+mget(
+  ls() |> (\(x) grep(pattern = "additional", x = x, value = TRUE))(),
+  ) |> 
+  map(~nrow(.x)) |> 
+  reduce(.f = sum)
+
+```
+
+7 6 4 2 1
+1 2 7 8 9
+9 7 6 2 1
+1 3 2 4 5
+8 6 4 4 1
+1 3 6 7 9
+
+
+
+```{r}
+tibble::tribble(
+  ~X1, ~X2, ~X3, ~X4, ~X5,
+  7, 6, 4, 2, 1,    
+  1, 2, 7, 8, 9,
+  9, 7, 6, 2, 1,
+  1, 3, 2, 4, 5,
+  8, 6, 4, 4, 1,
+  1, 3, 6, 7, 9
+) |>  
+  mutate(
+    indicator = 5
+  ) |> 
+   rowwise() |> 
+    mutate(
+      safe = case_when(
+        (X5 > X4) & (X4 > X3) & (X3 > X2) & (X2 > X1) ~ "Increasing",
+        (X5 < X4) & (X4 < X3) & (X3 < X2) & (X2 < X1) ~ "Decreasing",
+        TRUE ~ "Not Safe"
+      )
+    ) |> 
+    filter(safe == "Not Safe") |> 
+    mutate(
+      chg_1 = case_when(
+        X1 > X2 ~ -1,
+        X1 < X2 ~ 1,
+        X1 == X2 ~ 0
+      ),
+      chg_2 = case_when(
+        X2 > X3 ~ -1,
+        X2 < X3 ~ 1,
+        X2 == X3 ~ 0
+      ),
+      chg_3 = case_when(
+        X3 > X4 ~ -1,
+        X3 < X4 ~ 1,
+        X3 == X4 ~ 0
+      ),
+      chg_4 = case_when(
+        X4 > X5 ~ -1,
+        X4 < X5 ~ 1,
+        X4 == X5 ~ 0
+      )
+    ) |> 
+    mutate(
+      total_chg = sum(chg_1, chg_2, chg_3, chg_4)
+    ) |> 
+    filter(
+      total_chg >= 2 | total_chg <= -2
+    ) |> 
+    mutate(
+      comp_1 = X2 - X1,
+      comp_2 = X3 - X2,
+      comp_3 = X4 - X3,
+      comp_4 = X5 - X4
+    ) |> 
+    ungroup() |> 
+    filter(
+      abs(comp_1) <= 3,
+      abs(comp_2) <= 3,
+      abs(comp_3) <= 3,
+      abs(comp_4) <= 3
+    ) |> 
+    rowwise() |> 
+    mutate(
+      concat_vector = list(
+        c(X1, X2, X3, X4, X5)
+      )
+    ) |> 
+    mutate(
+      tot_unique_values = 
+        length(unique(concat_vector))
+    ) |>   
+    ungroup() |> 
+    filter(
+      tot_unique_values > (indicator - 2)
+    ) |> 
+    filter(
+      !((total_chg == -2) & (tot_unique_values == 4))
+    ) 
+```
